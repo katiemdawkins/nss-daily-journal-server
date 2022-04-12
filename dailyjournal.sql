@@ -27,3 +27,8 @@ INSERT INTO `Entries` VALUES (null, 'Python', 'Let myself get stuck for way too 
 
 
 SELECT * FROM  entries
+
+SELECT * FROM mood
+
+DELETE FROM entries
+WHERE id = 1

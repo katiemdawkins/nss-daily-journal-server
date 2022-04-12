@@ -1,6 +1,9 @@
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
+from views.entry_requests import delete_entry, get_all_entries, get_single_entry
+from views.mood_request import get_all_moods
+
 
 # Here's a class. It inherits from another class.
 # For now, think of a class as a container for functions that
@@ -11,7 +14,27 @@ class HandleRequests(BaseHTTPRequestHandler):
     # It gives a description of the class or function
     """Controls the functionality of any GET, PUT, POST, DELETE requests to the server
     """
+    def parse_url(self, path):
+        # Just like splitting a string in JavaScript. If the
+        # path is "/animals/1", the resulting list will
+        # have "" at index 0, "animals" at index 1, and "1"
+        # at index 2.
+        path_params = path.split("/")
+        resource = path_params[1]
+        id = None
 
+        # Try to get the item at index 2
+        try:
+            # Convert the string "1" to the integer 1
+            # This is the new parseInt()
+            id = int(path_params[2])
+        except IndexError:
+            pass  # No route parameter exists: /entries
+        except ValueError:
+            pass  # Request had trailing slash: /entries/
+
+        return (resource, id)  # This is a tuple
+    
     # Here's a class function
     def _set_headers(self, status):
         # Notice this Docstring also includes information about the arguments passed to the function
@@ -43,25 +66,21 @@ class HandleRequests(BaseHTTPRequestHandler):
     def do_GET(self):
         """Handles GET requests to the server
         """
-        # Set the response code to 'Ok'
         self._set_headers(200)
+        response = {}  # Default response
 
-        # Your new console.log() that outputs to the terminal
-        print(self.path)
+        # Parse the URL and capture the tuple that is returned
+        (resource, id) = self.parse_url(self.path)
 
-        # It's an if..else statement
-        if self.path == "/entries":
-            # In Python, this is a list of dictionaries
-            # In JavaScript, you would call it an array of objects
-            response = [
-                {"id": 1, "concept": "SQL", "entry": "SQL is really hard so far.",
-                    "date": "2007", "mood_id": 3},
-                {"id": 2, "concept": "SQL", "entry": "SQL is really hard so far.",
-                    "date": "2022-04-11", "mood_id": 3}
-            ]
+        if resource == "entries":
+            if id is not None:
+                response = f"{get_single_entry(id)}"
 
-        else:
-            response = []
+            else:
+                response = f"{get_all_entries()}"
+                
+        if resource == "moods":
+                response = f"{get_all_moods()}"
 
         # This weird code sends a response back to the client
         self.wfile.write(f"{response}".encode())
@@ -87,7 +106,15 @@ class HandleRequests(BaseHTTPRequestHandler):
         """
         self.do_POST()
 
-
+    def do_DELETE(self):
+        self._set_headers(204)
+        (resource, id) = self.parse_url(self.path)
+        
+        if resource == "entries":
+            delete_entry(id)
+            self.wfile.write("".encode())
+        
+        
 # This function is not inside the class. It is the starting
 # point of this application.
 def main():

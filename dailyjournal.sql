@@ -32,3 +32,6 @@ SELECT * FROM mood
 
 DELETE FROM entries
 WHERE id = 1
+
+SELECT * FROM Entries
+WHERE entry LIKE '%python%'

@@ -1,7 +1,7 @@
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
-
-from views.entry_requests import delete_entry, get_all_entries, get_single_entry
+import json
+from views.entry_requests import delete_entry, get_all_entries, get_entry_by_search, get_single_entry
 from views.mood_request import get_all_moods
 
 
@@ -21,19 +21,30 @@ class HandleRequests(BaseHTTPRequestHandler):
         # at index 2.
         path_params = path.split("/")
         resource = path_params[1]
-        id = None
+        
+        if "?" in resource:
+            # GIVEN: /customers?email=jenna@solis.com
 
+            param = resource.split("?")[1]  # email=jenna@solis.com
+            resource = resource.split("?")[0]  # 'customers'
+            pair = param.split("=")  # [ 'email', 'jenna@solis.com' ]
+            key = pair[0]  # 'email'
+            value = pair[1]  # 'jenna@solis.com'
+
+            return ( resource, key, value )
         # Try to get the item at index 2
-        try:
-            # Convert the string "1" to the integer 1
-            # This is the new parseInt()
-            id = int(path_params[2])
-        except IndexError:
-            pass  # No route parameter exists: /entries
-        except ValueError:
-            pass  # Request had trailing slash: /entries/
+        else:
+            id = None
+            try:
+                # Convert the string "1" to the integer 1
+                # This is the new parseInt()
+                id = int(path_params[2])
+            except IndexError:
+                pass  # No route parameter exists: /entries
+            except ValueError:
+                pass  # Request had trailing slash: /entries/
 
-        return (resource, id)  # This is a tuple
+            return (resource, id)  # This is a tuple
     
     # Here's a class function
     def _set_headers(self, status):
@@ -68,20 +79,29 @@ class HandleRequests(BaseHTTPRequestHandler):
         """
         self._set_headers(200)
         response = {}  # Default response
-
+        
+        parsed = self.parse_url(self.path)
         # Parse the URL and capture the tuple that is returned
-        (resource, id) = self.parse_url(self.path)
+        if len(parsed)== 2:
+            (resource, id) = parsed
 
-        if resource == "entries":
-            if id is not None:
-                response = f"{get_single_entry(id)}"
+            if resource == "entries":
+                if id is not None:
+                    response = f"{get_single_entry(id)}"
 
-            else:
-                response = f"{get_all_entries()}"
-                
-        if resource == "moods":
-                response = f"{get_all_moods()}"
+                else:
+                    response = f"{get_all_entries()}"
+                    
+            if resource == "moods":
+                    response = f"{get_all_moods()}"
 
+        
+        elif len(parsed) == 3:
+            ( resource, key, value ) = parsed
+            
+            if key == "q" and resource == "entries":
+                response = get_entry_by_search(value)
+            
         # This weird code sends a response back to the client
         self.wfile.write(f"{response}".encode())
 

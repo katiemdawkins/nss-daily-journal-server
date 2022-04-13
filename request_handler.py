@@ -1,7 +1,7 @@
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
-from views.entry_requests import delete_entry, get_all_entries, get_entry_by_search, get_single_entry
+from views.entry_requests import create_entry, delete_entry, get_all_entries, get_entry_by_search, get_single_entry
 from views.mood_request import get_all_moods
 
 
@@ -115,8 +115,17 @@ class HandleRequests(BaseHTTPRequestHandler):
 
         content_len = int(self.headers.get('content-length', 0))
         post_body = self.rfile.read(content_len)
-        response = f"received post request:<br>{post_body}"
-        self.wfile.write(response.encode())
+        
+        post_body = json.loads(post_body)
+        
+        (resource, id) = self.parse_url(self.path)
+
+            # Initialize new animal
+        new_entry = None
+        if resource == "entries":
+            new_entry = create_entry(post_body)
+            
+            self.wfile.write(f"{new_entry}".encode())
 
     # Here's a method on the class that overrides the parent's method.
     # It handles any PUT request.

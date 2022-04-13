@@ -6,4 +6,6 @@ class Entry():
        self.entry = entry
        self.date = date
        self.mood_id = mood_id
+       self.mood = None
 
+new_entry = Entry(2, "SQL", "SQL is really hard so far.", "	2022-04-11", 3)

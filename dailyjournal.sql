@@ -35,3 +35,7 @@ WHERE id = 1
 
 SELECT * FROM Entries
 WHERE entry LIKE '%python%'
+
+SELECT * 
+FROM Entries e 
+JOIN Mood m ON e.mood_id = m.id

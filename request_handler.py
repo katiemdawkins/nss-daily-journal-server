@@ -1,7 +1,7 @@
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
-from views.entry_requests import create_entry, delete_entry, get_all_entries, get_entry_by_search, get_single_entry
+from views.entry_requests import create_entry, delete_entry, get_all_entries, get_entry_by_search, get_single_entry, update_entry
 from views.mood_request import get_all_moods
 
 
@@ -133,7 +133,24 @@ class HandleRequests(BaseHTTPRequestHandler):
     def do_PUT(self):
         """Handles PUT requests to the server
         """
-        self.do_POST()
+        content_len = int(self.headers.get('content-length', 0))
+        post_body = self.rfile.read(content_len)
+        post_body = json.loads(post_body)
+
+        # Parse the URL
+        (resource, id) = self.parse_url(self.path)
+
+        success = False
+        
+        if resource == "entries":
+            success = update_entry(id, post_body)
+         
+        if success:
+            self._set_headers(204)
+        else:
+            self._set_headers(404)  
+             
+        self.wfile.write("".encode())   
 
     def do_DELETE(self):
         self._set_headers(204)

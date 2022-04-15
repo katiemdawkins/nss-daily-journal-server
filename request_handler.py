@@ -2,6 +2,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 from views.entry_requests import create_entry, delete_entry, get_all_entries, get_entry_by_search, get_single_entry, update_entry
+from views.entry_tags_request import get_all_entrytags
 from views.mood_request import get_all_moods
 from views.tag_requests import get_all_tags
 
@@ -98,6 +99,9 @@ class HandleRequests(BaseHTTPRequestHandler):
 
             if resource == "tags":
                 response = f"{get_all_tags()}"
+            
+            if resource =="entrytags":
+                response = f"{get_all_entrytags()}"
         
         elif len(parsed) == 3:
             ( resource, key, value ) = parsed

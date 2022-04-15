@@ -12,6 +12,32 @@ CREATE TABLE `Entries` (
     FOREIGN KEY(`mood_id`) REFERENCES `Mood`(`id`)
 );
 
+CREATE TABLE `Tag` (
+    `id`       INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    `name`     TEXT NOT NULL 
+);
+
+CREATE TABLE `EntryTag` (
+    `id`        INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    `entry_id`  INTEGER NOT NULL,
+    `tag_id`    INTEGER NOT NULL,
+    FOREIGN KEY (`entry_id`) REFERENCES `Entries`(`id`),
+    FOREIGN KEY (`tag_id`) REFERENCES `Tag` (`id`)
+);
+
+INSERT INTO `Tag` VALUES (null, 'New Concept');
+INSERT INTO `Tag` VALUES (null, 'Challenging');
+INSERT INTO `Tag` VALUES (null, 'Easy');
+INSERT INTO `Tag` VALUES (null, 'Intermediate');
+INSERT INTO `Tag` VALUES (null, 'Interesting');
+INSERT INTO `Tag` VALUES (null, 'Dull');
+
+SELECT * FROM Tag;
+
+Select * FROM EntryTag;
+
+INSERT INTO `EntryTag` VALUES (null, 1, 1);
+INSERT INTO `EntryTag` VALUES (null, 1, 2);
 
 INSERT INTO `Mood` VALUES (null, 'Feelin Angry');
 INSERT INTO `Mood` VALUES (null, 'Feelin Content');
@@ -39,3 +65,16 @@ WHERE entry LIKE '%python%'
 SELECT * 
 FROM Entries e 
 JOIN Mood m ON e.mood_id = m.id
+
+SELECT
+    e.id,
+    et.id,
+    et.entry_id,
+    et.tag_id,
+    t.id,
+    t.name
+FROM entries e
+JOIN entrytag et
+    ON e.id = et.entry_id
+JOIN tag t
+    ON t.id = et.tag_id  
